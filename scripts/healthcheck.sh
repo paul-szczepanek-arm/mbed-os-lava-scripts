@@ -1,8 +1,6 @@
 #!/bin/bash
-set -ex
 cd "$(dirname "$0")"
-source ./common.sh
-mount_boards
+source ./bootstrap.sh
 
 cd
 
