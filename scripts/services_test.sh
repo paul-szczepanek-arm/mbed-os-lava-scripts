@@ -2,6 +2,7 @@
 set -ex
 cd "$(dirname "$0")"
 source ./common.sh
+mount_boards
 
 cd
 
@@ -32,15 +33,19 @@ run_test () {
   cd ${TEST_NAME}/device
   if [ -n "$USER_TOKEN" ]; then
     set +x
-    download_artifacts "$REPO_NAME" "LinkLoss-GCC_ARM-NRF52840_DK-${SHA}" "$BARE_TOKEN" ${TEST_NAME}.hex
+    download_artifacts "$REPO_NAME" "${TEST_NAME}-GCC_ARM-${TARGET}-${SHA}" "$BARE_TOKEN" ${TEST_NAME}.hex
     set -x
     cp ${TEST_NAME}.hex "$MOUNTPOINT"
+    sync
+    sleep 5
     # remount the drive - mount is still present, programming doesn't work?
     # mount "/dev/sd${MOUNTPOINT: -1}" "$MOUNTPOINT"
   else
     time mbed compile -t GCC_ARM -m ${TARGET} -f
   fi
   cd ../../
+  pyocd reset
+  sleep 1
   python3 -m pytest ${TEST_NAME}/host
 }
 
